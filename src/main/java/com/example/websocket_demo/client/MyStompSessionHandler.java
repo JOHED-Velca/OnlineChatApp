@@ -17,7 +17,7 @@ public class MyStompSessionHandler extends StompSessionHandlerAdapter {
 
     @Override
     public void afterConnected(StompSession session, StompHeaders connectedHeaders) {   //once the user has successfully connected to the socket
-        System.out.println("Client Connected!");
+        System.out.println("Client Connected");
         session.subscribe("/topic/messages", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
@@ -38,7 +38,13 @@ public class MyStompSessionHandler extends StompSessionHandlerAdapter {
                 }
             }
         });
-        System.out.println("Client subscribed to /topic/messages");
+        // Add a small delay to ensure the subscription is established
+        try {
+            Thread.sleep(1000); // 1-second delay
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Client subscribe to /topic/messages");
     }
 
     @Override
