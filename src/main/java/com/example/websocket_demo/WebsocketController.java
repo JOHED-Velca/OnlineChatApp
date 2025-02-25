@@ -8,9 +8,11 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class WebsocketController {
     private final SimpMessagingTemplate messagingTemplate;
+    private final WebSocketSessionManager sessionManager; //reference to the websocketSessionManager
 
     @Autowired
-    public WebsocketController (SimpMessagingTemplate messagingTemplate) {
+    public WebsocketController (SimpMessagingTemplate messagingTemplate, WebSocketSessionManager sessionManager) {
+        this.sessionManager = sessionManager;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -19,5 +21,19 @@ public class WebsocketController {
         System.out.println("Received message from user: " + message.getUser() + ": " + message.getMessage()); //message for debugging
         messagingTemplate.convertAndSend("/topic/messages", message);
         System.out.println("Sent message to /topic/messages: " + message.getUser() + ": " + message.getMessage()); //debugging
+    }
+
+    @MessageMapping("/connect")
+    public void connectUser(String username){
+        sessionManager.addUsername(username);
+        sessionManager.broadcastActiveUsernames();
+        System.out.println(username + " connected");
+    }
+
+    @MessageMapping("/disconnect")
+    public void disconnectUser(String username) {
+        sessionManager.removeUsername(username);
+        sessionManager.broadcastActiveUsernames();
+        System.out.println(username + " disconnected");
     }
 }
