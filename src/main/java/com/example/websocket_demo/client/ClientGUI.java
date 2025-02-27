@@ -8,9 +8,10 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-public class ClientGUI extends JFrame {
+public class ClientGUI extends JFrame implements MessageListener {
     private JPanel connectedUsersPanel, messagePanel;
     private MyStompClient myStompClient;
     private String username;
@@ -18,7 +19,7 @@ public class ClientGUI extends JFrame {
     public ClientGUI(String username) throws ExecutionException, InterruptedException {
         super("User: " + username);
         this.username = username;
-        myStompClient = new MyStompClient(username);
+        myStompClient = new MyStompClient(this, username);
 
         setSize(1218, 685);
         setLocationRelativeTo(null); //loads the GUI in the center of screen
@@ -87,10 +88,6 @@ public class ClientGUI extends JFrame {
 
                     inputField.setText("");
 
-                    messagePanel.add(createChatMessageComponent(new Message("TapTap", input)));
-                    repaint();
-                    revalidate();
-
                     myStompClient.sendMessage(new Message(username, input));
                 }
             }
@@ -123,5 +120,37 @@ public class ClientGUI extends JFrame {
         chatMessage.add(messageLabel);
 
         return chatMessage;
+    }
+
+    @Override
+    public void onMessageReceive(Message message) {
+        messagePanel.add(createChatMessageComponent(message));
+        revalidate();
+        repaint();
+    }
+
+    @Override
+    public void onActiveUsersUpdate(ArrayList<String> users) {
+        //remove the current user list panel (which should be the second component in the panel)
+        //the user list panel doesn't get added until after and this is mainly fore when the users get updated
+        if (connectedUsersPanel.getComponents().length >= 2) {
+            connectedUsersPanel.remove(1);
+        }
+
+        JPanel usersListPanel = new JPanel();
+        usersListPanel.setBackground(Utilities.TRANSPARENT_COLOR);
+        usersListPanel.setLayout(new BoxLayout(usersListPanel, BoxLayout.Y_AXIS));
+
+        for (String user : users) {
+            JLabel username = new JLabel();
+            username.setText(user);
+            username.setForeground(Utilities.TEXT_COLOR);
+            username.setFont(new Font("Inter", Font.BOLD, 16));
+            usersListPanel.add(username);
+        }
+
+        connectedUsersPanel.add(usersListPanel);
+        revalidate();
+        repaint();
     }
 }

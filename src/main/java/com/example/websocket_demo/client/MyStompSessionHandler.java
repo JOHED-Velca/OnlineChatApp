@@ -7,12 +7,15 @@ import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 public class MyStompSessionHandler extends StompSessionHandlerAdapter {
     private String username;
+    private MessageListener messageListener;
 
-    public MyStompSessionHandler(String username) {
+    public MyStompSessionHandler(MessageListener messageListener, String username) {
         this.username = username;
+        this.messageListener = messageListener;
     }
 
     @Override
@@ -30,6 +33,7 @@ public class MyStompSessionHandler extends StompSessionHandlerAdapter {
                 try {
                     if (payload instanceof Message) {
                         Message message = (Message) payload;
+                        messageListener.onMessageReceive(message);
                         System.out.println("Received message: " + message.getUser() + ": " + message.getMessage());
                     } else {
                         System.out.println("Received unexpected payload type: " + payload.getClass());
@@ -46,6 +50,27 @@ public class MyStompSessionHandler extends StompSessionHandlerAdapter {
             e.printStackTrace();
         }
         System.out.println("Client subscribe to /topic/messages");
+
+        session.subscribe("/topic/users", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return new ArrayList<String>().getClass();
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                try {
+                    if (payload instanceof ArrayList){
+                        ArrayList<String> activeUsers = (ArrayList<String>) payload;
+                        messageListener.onActiveUsersUpdate(activeUsers);
+                        System.out.println("Receive active users: " + activeUsers);
+                    }
+                }catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        System.out.println("Subscribe to /topic/users");
     }
 
     @Override
