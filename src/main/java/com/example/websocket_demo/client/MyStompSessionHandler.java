@@ -49,7 +49,7 @@ public class MyStompSessionHandler extends StompSessionHandlerAdapter {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("Client subscribe to /topic/messages");
+        System.out.println("Client subscribed to /topic/messages");
 
         session.subscribe("/topic/users", new StompFrameHandler() {
             @Override
@@ -63,14 +63,16 @@ public class MyStompSessionHandler extends StompSessionHandlerAdapter {
                     if (payload instanceof ArrayList){
                         ArrayList<String> activeUsers = (ArrayList<String>) payload;
                         messageListener.onActiveUsersUpdate(activeUsers);
-                        System.out.println("Receive active users: " + activeUsers);
+                        System.out.println("Received active users: " + activeUsers);
+                    }else {
+                        System.out.println("Unexpected payload type: " + payload.getClass()); // Debugging
                     }
                 }catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
-        System.out.println("Subscribe to /topic/users");
+        System.out.println("Subscribed to /topic/users");
     }
 
     @Override

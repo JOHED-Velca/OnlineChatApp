@@ -69,8 +69,7 @@ public class ClientGUI extends JFrame implements MessageListener {
         messagePanel.setBackground(Utilities.TRANSPARENT_COLOR);
         chatPanel.add(messagePanel, BorderLayout.CENTER);
 
-        messagePanel.add(createChatMessageComponent(new Message("TapTap", "Hello World")));
-
+//        messagePanel.add(createChatMessageComponent(new Message("TapTap", "Hello World")));
         JPanel inputPanel = new JPanel();
         inputPanel.setBorder(Utilities.addPadding(10, 10, 10, 10));
         inputPanel.setLayout(new BorderLayout());
@@ -131,26 +130,29 @@ public class ClientGUI extends JFrame implements MessageListener {
 
     @Override
     public void onActiveUsersUpdate(ArrayList<String> users) {
+        System.out.println("Updating active users list: " + users); // Debugging
         //remove the current user list panel (which should be the second component in the panel)
-        //the user list panel doesn't get added until after and this is mainly fore when the users get updated
+        //the user list panel doesn't get added until after and this is mainly for when the users get updated
         if (connectedUsersPanel.getComponents().length >= 2) {
             connectedUsersPanel.remove(1);
         }
 
-        JPanel usersListPanel = new JPanel();
-        usersListPanel.setBackground(Utilities.TRANSPARENT_COLOR);
-        usersListPanel.setLayout(new BoxLayout(usersListPanel, BoxLayout.Y_AXIS));
+        JPanel userListPanel = new JPanel();
+        userListPanel.setBackground(Utilities.TRANSPARENT_COLOR);
+        userListPanel.setLayout(new BoxLayout(userListPanel, BoxLayout.Y_AXIS));
+        userListPanel.setBorder(BorderFactory.createLineBorder(Color.RED)); // Debugging
 
         for (String user : users) {
             JLabel username = new JLabel();
             username.setText(user);
             username.setForeground(Utilities.TEXT_COLOR);
             username.setFont(new Font("Inter", Font.BOLD, 16));
-            usersListPanel.add(username);
+            userListPanel.add(username);
         }
 
-        connectedUsersPanel.add(usersListPanel);
+        connectedUsersPanel.add(userListPanel);
         revalidate();
         repaint();
+        System.out.println("User list panel added to GUI"); // Debugging
     }
 }
